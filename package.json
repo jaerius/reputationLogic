@@ -1,0 +1,28 @@
+{
+  "name": "reputationtest",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "simulate": "ts-node reputation.ts",
+    "detect": "ts-node communityDetection.ts",
+    "example": "node example.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@types/node": "^22.0.0",
+    "graphlib": "^2.1.8",
+    "graphology": "^0.25.4",
+    "graphology-communities-louvain": "^2.0.1",
+    "graphology-layout": "^0.6.1",
+    "graphology-metrics": "^2.3.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  },
+  "devDependencies": {
+    "@types/graphlib": "^2.1.12"
+  }
+}
