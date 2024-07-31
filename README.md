@@ -71,6 +71,10 @@ $$
 3. 기준이 되는 알고리즘 정확한 이해 필요
 
 
+### Result
+
+![alt text](image.png)
+
 
 ### 1. Community Detection (커뮤니티 탐지)
 
