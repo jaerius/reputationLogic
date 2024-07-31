@@ -74,26 +74,68 @@ const fromJSON = (GraphConstructor, json) => {
   // 그래프 로드
   const loadedGraphData = JSON.parse(readFileSync('reputationGraph.json', 'utf8'));
   const loadedGraph = fromJSON(Graph, loadedGraphData);
+
+  // weight를 제대로 사용하기 위하여 weight가 클 수록, 거리가 가까운 invertedWeightGraph생성
+  const invertedWeightGraph = new Graph();
+ 
+  // 원래 그래프에서 노드를 복사
+  loadedGraph.forEachNode((node, attributes) => {
+    invertedWeightGraph.addNode(node, attributes);
+  });
+
+  // 원래 그래프에서 엣지를 복사하면서 가중치를 변환
+  loadedGraph.forEachEdge((edge, attributes, source, target) => {
+    const invertedWeight = 1 / attributes.weight;
+    invertedWeightGraph.addEdgeWithKey(edge, source, target, { ...attributes, weight: invertedWeight });
+  
+  });
+
   
   // Louvain 커뮤니티 탐지
   const louvainCommunities = louvain(loadedGraph);
   console.log('Louvain Communities:', louvainCommunities);
   
   // PageRank 계산
-  const ranks = pagerank(loadedGraph);
+  const ranks = pagerank(loadedGraph, {
+    attributes: {
+        weight: 'weight'
+    }
+  });
   console.log('PageRank:', ranks);
   
-  // Degree Centrality 계산
-  const degrees = degreeCentrality(loadedGraph);
+  // Degree Centrality 계산 -> 단순히 노드에 연결된 엣지의 수만 카운트
+  const degrees = degreeCentrality(loadedGraph, {
+    attributes: {
+        weight: 'weight'
+    }
+  });
   console.log('Degree Centrality:', degrees);
   
   // Closeness Centrality 계산
   const closeness = closenessCentrality(loadedGraph);
   console.log('Closeness Centrality:', closeness);
+
+  // 그래프 상의 노드별 평가받은 weight점수 출력
+  loadedGraph.forEachNode((node, attributes) => {
+        let sumWeight = 0;
+        loadedGraph.forEachEdge(node, (edge, edgeAttributes, source, target) => {
+            if(target === node){
+                sumWeight += edgeAttributes.weight || 0
+            }
+        })
+        console.log(`Node ${node} sumWeight`, sumWeight)
+  });
   
   // Betweenness Centrality 계산
-  const betweenness = betweennessCentrality(loadedGraph);
-  console.log('Betweenness Centrality:', betweenness);
+  // 변환된 가중치를 사용하여 Betweenness Centrality 계산
+  const betweenness = betweennessCentrality(invertedWeightGraph, {
+    attributes: {
+      weight: 'weight'
+    }
+  });
+  console.log('Betweenness Centrality with Inverted Weights:', betweenness);
+  // 10배 이상 높게 차이남
+
   
   // IQR 기반 이상치 탐지 함수
   const detectOutliersIQR = (metric) => { // 결과를 quarter로 나누어, q1, q3 상위 25%와 하위 25%를 
